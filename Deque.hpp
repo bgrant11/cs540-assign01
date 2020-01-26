@@ -6,7 +6,7 @@
 
 
 #define Deque_DEFINE(t)											\
-	/* container struct */										\
+	/* DEQ struct ------------------------------------- */	\
     struct Deque_##t {											\
 		char *type_name; /* how to set*/						\
 		int head;												\
@@ -16,27 +16,72 @@
 		bool (*empty)(Deque_##t *de); /* true if empty */ 		\
 		void (*push_back)(Deque_##t *de, t item);				\
 		void (*push_front)(Deque_##t *de, t item);				\
-		const t& (*back)(Deque_##t *de); /* TODO return const reference?*/	\
-		const t& (*front)(Deque_##t *de);						\
-		const t& (*at)(Deque_##t *de, int idx);					\
+		t& (*back)(Deque_##t *de); /* TODO return const reference?*/	\
+		t& (*front)(Deque_##t *de);						\
+		t& (*at)(Deque_##t *de, int idx);					\
 		void (*pop_back)(Deque_##t *de);						\
 		void (*pop_front)(Deque_##t *de);						\
 		void (*clear)(Deque_##t *de);							\
 		void (*dtor)(Deque_##t *de);							\
 	};															\
 																\
-	struct Deque_##t##_iterator {								\
-																\
-	};															\
-																\
+														\
+	/* DEQ member fns------------------------------------------------ */
 	size_t Deque_##t##_size(Deque_##t *de) {					\
 																\
 	}															\
+	
+	bool empty(Deque_##t *de) {
+
+	}
+			
+	void push_back(Deque_##t *de, t item) {
+	
+	}
+				
+	void push_front(Deque_##t *de, t item) {
+	
+	}
+
+	t& back(Deque_##t *de) {
+
+	}
+
+	t& front(Deque_##t *de){
+
+	}
+					
+	t& at(Deque_##t *de, int idx) {
+
+	}
+				
+	void pop_back(Deque_##t *de){
+	
+	}
+					
+	void pop_front(Deque_##t *de){
+
+	}		
+				
+	void clear(Deque_##t *de){
+
+	}
+						
+	void dtor(Deque_##t *de){
+
+	}
+	/* Iterator struct-------------------------------------------------*/
+	struct Deque_##t##_iterator {								\
 																\
-	bool Deque_##t##_equal(Deque_##t *de1, Deque_##t *de2){		\
-																\
-	}															\
-	void Deque_##t##_ctor(Deque_##t *de, void(*cmp)()){			\
+	};	
+	
+	/* Iterator member fns------------------------------------------------ */
+	
+	/* ctor and other fns ------------------------------------------s----- */	
+	bool Deque_##t##_equal(Deque_##t *de1, Deque_##t *de2){		
+																
+	}														
+	void Deque_##t##_ctor(Deque_##t *de, void(*cmp)()){			
 		de->													\
 	}															\
 
