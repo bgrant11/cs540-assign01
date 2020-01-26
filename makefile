@@ -19,3 +19,6 @@ val: Deque
 
 valv: Deque
 	valgrind -v ./Deque
+
+pre: Deque
+	g++ -O0 -g -Wall -std=c++11 -E -c test.cpp
