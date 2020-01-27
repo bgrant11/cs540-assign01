@@ -29,5 +29,9 @@ main(){
 	
 	strcpy(str.name2, st2);
 	printf("str.name2 %s str.name2 size %lu\n", str.name2, sizeof(str.name2));
+	unsigned int t = 0;
+	t--;
+	printf("t %u\n", t);
+	
 	
 }
