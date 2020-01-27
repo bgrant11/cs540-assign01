@@ -22,3 +22,6 @@ valv: Deque
 
 pre: Deque
 	g++ -O0 -g -Wall -std=c++11 -E -c test.cpp
+
+test: Deque
+	./Deque
