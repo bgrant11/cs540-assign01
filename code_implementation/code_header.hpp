@@ -37,7 +37,7 @@ MyClass_print(const MyClass *o) {
 
 struct Deque_MyClass_Iterator; // forward decl;
 void Deque_MyClass_Iterator_ctor(Deque_MyClass_Iterator * it, unsigned int idx, 
-								size_t at_element, MyClass *data);
+							size_t at_element, MyClass *data, size_t capacity);
 
 // define DEQUE_Myclass
 
@@ -66,9 +66,9 @@ struct Deque_MyClass {
 	Deque_MyClass_Iterator (*begin)(Deque_MyClass *de);
 	Deque_MyClass_Iterator (*end)(Deque_MyClass *de);
 	unsigned int (*dec_idx)(Deque_MyClass *de, unsigned int idx, 
-														unsigned int amount);
+										unsigned int amount, size_t capacity);
 	unsigned int (*inc_idx)(Deque_MyClass *de, unsigned int idx, 
-														unsigned int amount);
+										unsigned int amount, size_t capacity);
 	unsigned int (*real_idx)(Deque_MyClass *de, unsigned int idx);
 	bool (*has_open_spot)(Deque_MyClass *de);
 };
@@ -77,6 +77,7 @@ struct Deque_MyClass {
 struct Deque_MyClass_Iterator {								
 	unsigned int idx;
 	size_t at_element;
+	size_t capacity;	
 	void (*inc)(Deque_MyClass_Iterator *it);	
 	void (*dec)(Deque_MyClass_Iterator *it);
 	MyClass& (*deref)(Deque_MyClass_Iterator *it);
@@ -105,7 +106,7 @@ void Deque_MyClass_push_back(Deque_MyClass *de, MyClass item) {
 	de->sz++; */
 	if(de->has_open_spot(de)){
 		de->data[de->real_idx(de, de->tail)] = item;
-		de->tail = de->inc_idx(de, de->tail, 1);
+		de->tail = de->inc_idx(de, de->tail, 1, de->capacity);
 	}
 	else{
 		//TODO resize
@@ -124,7 +125,7 @@ void Deque_MyClass_push_front(Deque_MyClass *de, MyClass item) {
 	de->sz++; */
 	if(de->has_open_spot(de)){
 		de->data[de->real_idx(de, de->head)] = item;
-		de->head = de->dec_idx(de, de->head, 1);
+		de->head = de->dec_idx(de, de->head, 1, de->capacity);
 	}
 	else{
 		//TODO resize
@@ -134,7 +135,7 @@ void Deque_MyClass_push_front(Deque_MyClass *de, MyClass item) {
 
 MyClass& Deque_MyClass_back(Deque_MyClass *de) {
 	//return de->data[(de->tail-1)% de->capacity]; //TODO not correct probably
-	unsigned int idx = de->dec_idx(de, de->tail, 1);
+	unsigned int idx = de->dec_idx(de, de->tail, 1, de->capacity);
 	unsigned int true_idx = de->real_idx(de, idx);
 	return de->data[true_idx];
 }
@@ -142,19 +143,20 @@ MyClass& Deque_MyClass_back(Deque_MyClass *de) {
 MyClass& Deque_MyClass_front(Deque_MyClass *de){
 	//return de->data[(de->head+1)% de->capacity]; //TODO not correct probably
 												//maybe wrap inc and dec in a fn
-	unsigned int idx = de->inc_idx(de, de->head, 1);
+	unsigned int idx = de->inc_idx(de, de->head, 1, de->capacity);
 	unsigned int true_idx = de->real_idx(de, idx); //TODO something about the 
 	return de->data[true_idx];						// case when full where is head?
 }
 					
 MyClass& Deque_MyClass_at(Deque_MyClass *de, int idx) {
-	unsigned int firstElement = de->head+1; // definitely need to wrap
+	unsigned int idx_of_elem = de->real_idx(de, de->head+idx+1);
+	return de->data[idx_of_elem];
 	
 }
 				
 bool Deque_MyClass_pop_back(Deque_MyClass *de){
 	if(!de->empty(de)){
-		de->tail = de->dec_idx(de, de->tail, 1); //TODO distinction between 2x
+		de->tail = de->dec_idx(de, de->tail, 1, de->capacity); //TODO distinction between 2x
 		de->sz--;		
 		return true;							//or 4x size in inc/dec?
 	}
@@ -163,7 +165,7 @@ bool Deque_MyClass_pop_back(Deque_MyClass *de){
 					
 bool Deque_MyClass_pop_front(Deque_MyClass *de){
 	if(!de->empty(de)){
-		de->head = de->inc_idx(de, de->head, 1); //TODO distinction between 2x
+		de->head = de->inc_idx(de, de->head, 1, de->capacity); //TODO distinction between 2x
 		de->sz--;		
 		return true;							//or 4x size in inc/dec?
 	}
@@ -183,39 +185,41 @@ void Deque_MyClass_dtor(Deque_MyClass *de){
 
 Deque_MyClass_Iterator Deque_MyClass_begin(Deque_MyClass *de){
 	Deque_MyClass_Iterator it;
-	unsigned int idx = de->real_idx(de, de->head+1);
+	unsigned int idx = de->inc_idx(de, de->head, 1, de->capacity);
 	size_t at = 0;
-	Deque_MyClass_Iterator_ctor(&it, idx, at, de->data);
+	Deque_MyClass_Iterator_ctor(&it, idx, at, de->data, de->capacity);
 	return it;
 }
 
 Deque_MyClass_Iterator Deque_MyClass_end(Deque_MyClass *de){
 	Deque_MyClass_Iterator it;
-	unsigned int idx = de->real_idx(de, de->tail); 
+	unsigned int idx = de->tail; 
 	size_t at = (size_t)de->size;	
-	Deque_MyClass_Iterator_ctor(&it, idx, at, de->data);
+	Deque_MyClass_Iterator_ctor(&it, idx, at, de->data, de->capacity);
 	return it;
 }
 
 unsigned int Deque_MyClass_dec_idx(Deque_MyClass *de, unsigned int idx, 
-														unsigned int amount){
+										unsigned int amount, size_t capacity){
 	unsigned int ret = idx;
-	for(int i = 0; i < amount; i++){
-		ret = ( ret-1 != UINT_MAX ) ? ret - 1 : 2*de->capacity-1;
+	for(unsigned int i = 0; i < amount; i++){
+		ret = ( ret-1 != UINT_MAX ) ? ret - 1 : 2*capacity-1;
 	}
 	return ret;
 
 }
 
 unsigned int Deque_MyClass_inc_idx(Deque_MyClass *de, unsigned int idx, 
-														unsigned int amount){
+										unsigned int amount, size_t capacity){
 	unsigned int ret = idx;
-	for(int i = 0; i < amount; i++){	
-		ret = ( ret+1 < 4*de->capacity ) ? ret + 1 : 2*de->capacity;
+	for(unsigned int i = 0; i < amount; i++){	
+		ret = ( ret+1 < 4*capacity ) ? ret + 1 : 2*capacity;
 	}
 	return ret;
 
 }
+
+
 
 unsigned int Deque_MyClass_real_idx(Deque_MyClass *de, unsigned int idx){
 	return idx%de->capacity;
@@ -229,35 +233,44 @@ bool Deque_MyClass_has_open_spot(Deque_MyClass *de){
 	
 /* Iterator member fns------------------------------------------------ */
 void Deque_MyClass_Iterator_inc(Deque_MyClass_Iterator *it){
-	
+	it->idx = ( it->idx+1 < 4*it->capacity ) ? it->idx + 1 : 2*it->capacity;
+	it->idx = it->idx % it->capacity;
+	it->at_element++;
 }
+
+
 	
 void Deque_MyClass_Iterator_dec(Deque_MyClass_Iterator *it){
-
+	it->idx = ( it->idx-1 != UINT_MAX ) ? it->idx - 1 : 2*it->capacity-1;
+	it->idx = it->idx % it->capacity;
+	it->at_element--;
+	
 }
 
-MyClass& Deque_MyClass_Iterator_deref(Deque_MyClass_Iterator *it){
 
+MyClass& Deque_MyClass_Iterator_deref(Deque_MyClass_Iterator *it){
+	return it->data[it->idx];
 }
 	
 /* ctor and other fns ------------------------------------------s----- */	
 bool Deque_MyClass_equal(Deque_MyClass& de1, Deque_MyClass& de2){		
-																
+	return true;															
 }
 
 bool Deque_MyClass_Iterator_equal(Deque_MyClass_Iterator it, 
 													Deque_MyClass_Iterator end){
-
+	return (it.idx == end.idx) && (it.at_element == end.at_element);
 }
 
 void Deque_MyClass_Iterator_ctor(Deque_MyClass_Iterator * it, unsigned int idx, 
-								size_t at_element, MyClass *data){
+							size_t at_element, MyClass *data, size_t capacity){
 	it->idx = idx;
 	it->at_element = at_element;
 	it->inc = Deque_MyClass_Iterator_inc;
 	it->dec = Deque_MyClass_Iterator_dec;
 	it->deref = Deque_MyClass_Iterator_deref;
 	it->data = data;
+	it->capacity = capacity;
 }
 														
 void Deque_MyClass_ctor(Deque_MyClass *de, 

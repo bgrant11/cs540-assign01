@@ -3,10 +3,10 @@
 all: code_Deque
 
 code_Deque: code_implementation.o
-	g++ -O0 -g -Wall -std=c++11  code_implementation.o -o code_Deque
+	g++ -O0 -g -Wall -Wextra -pedantic -std=c++11  code_implementation.o -o code_Deque
 
 code_implementation.o: code_implementation.cpp
-	g++ -O0 -g -Wall -std=c++11 -c code_implementation.cpp
+	g++ -O0 -g -Wall -Wextra -pedantic -std=c++11 -c code_implementation.cpp
 
 clean:
 	rm -f *.o code_Deque
