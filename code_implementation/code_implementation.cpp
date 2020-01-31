@@ -37,11 +37,18 @@ main() {
 
         assert(deq.size(&deq) == 3);
 
+		//brian
+	
+		//Deque_MyClass_Iterator it = deq.begin(&deq);
+		//printf("it.idx %u it.at_element %lu it->capacity %lu\n", it.idx, 
+		//											it.at_element, it.capacity);
+		//Deque_MyClass_Iterator end = deq.end(&deq);
+///*
         for (Deque_MyClass_Iterator it = deq.begin(&deq);
          !Deque_MyClass_Iterator_equal(it, deq.end(&deq)); it.inc(&it)) {
             MyClass_print(&it.deref(&it));
         }
-
+///*
         // Multiple iterators?
         for (Deque_MyClass_Iterator it1 = deq.begin(&deq);
          !Deque_MyClass_Iterator_equal(it1, deq.end(&deq)); it1.inc(&it1)) {
@@ -71,7 +78,8 @@ main() {
 
         // Test that front(), back(), at(), and deref() are returning a reference.
         // Change via at().
-        assert(deq.at(&deq, 0).id == 0);
+		printf("id %d\n", deq.at(&deq, 0).id);         
+		assert(deq.at(&deq, 0).id == 0);
         deq.at(&deq, 0).id = 100;
         assert(deq.at(&deq, 0).id == 100);
         // Change via front().
@@ -122,8 +130,9 @@ main() {
             deq1.dtor(&deq1);
             deq2.dtor(&deq2);
         }
-
+	//*/
     }
 
 
 }
+

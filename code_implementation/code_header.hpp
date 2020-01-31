@@ -65,12 +65,6 @@ struct Deque_MyClass {
 	bool (*comparator)(const MyClass& o1, const MyClass &o2);
 	Deque_MyClass_Iterator (*begin)(Deque_MyClass *de);
 	Deque_MyClass_Iterator (*end)(Deque_MyClass *de);
-	//unsigned int (*dec_idx)(Deque_MyClass *de, unsigned int idx, 
-	//									unsigned int amount, size_t capacity);
-	//unsigned int (*inc_idx)(Deque_MyClass *de, unsigned int idx, 
-	//									unsigned int amount, size_t capacity);
-	//unsigned int (*real_idx)(Deque_MyClass *de, unsigned int idx);
-	//bool (*has_open_spot)(Deque_MyClass *de);
 };
 
 	/* Iterator struct-------------------------------------------------*/
@@ -96,41 +90,25 @@ bool Deque_MyClass_empty(Deque_MyClass *de) {
 
 			
 void Deque_MyClass_push_back(Deque_MyClass *de, MyClass item) {
-	/*if(de->sz < de->capacity){
-		de->data[de->tail % de->capacity] = item;
-		de->tail = ( de->tail+1 < 4*de->capacity ) ? de->tail + 1 : 
-																2*de->capacity;
-	}
-	else{
-		//TODO resize
-	}
-	de->sz++; */
 	if(de->sz < de->capacity){
-		//de->data[de->real_idx(de, de->tail)] = item;
 		de->data[de->tail] = item;
-		//de->tail = de->inc_idx(de, de->tail, 1, de->capacity);
+		//printf("push_back de->tail before %u\n", de->tail);
 		de->tail = (de->tail < (de->capacity-1)) ? de->tail + 1 : 0; 
+		//printf("push_back de->tail after %u\n", de->tail);
 	}													//  increment tail
 	else{
 		//TODO resize
 	}
+	
 	de->sz++;
 }	
 				
 void Deque_MyClass_push_front(Deque_MyClass *de, MyClass item) {
-	/*if(de->sz < de->capacity){
-		de->data[de->head % de->capacity] = item;
-		de->head = ( de->head-1 != UINT_MAX ) ? de->head - 1 : 2*de->capacity-1;
-	}
-	else{
-		//TODO resize
-	}
-	de->sz++; */
 	if(de->sz < de->capacity){
-		//de->data[de->real_idx(de, de->head)] = item;
 		de->data[de->head] = item;		
-		//de->head = de->dec_idx(de, de->head, 1, de->capacity);
+		//printf("push_front de->head before %u\n", de->head);	
 		de->head = (de->head > 0) ? de->head - 1 : de->capacity - 1;
+		//printf("push_front de->head after %u\n", de->head);	
 	}
 	else{
 		//TODO resize
@@ -139,30 +117,26 @@ void Deque_MyClass_push_front(Deque_MyClass *de, MyClass item) {
 }
 
 MyClass& Deque_MyClass_back(Deque_MyClass *de) {
-	//unsigned int idx = de->dec_idx(de, de->tail, 1, de->capacity);
-	//unsigned int true_idx = de->real_idx(de, idx);
 	unsigned int idx = (de->tail > 0) ? de->tail - 1 : de->capacity - 1;	
 	return de->data[idx];
 }
 
-MyClass& Deque_MyClass_front(Deque_MyClass *de){
-	//unsigned int idx = de->inc_idx(de, de->head, 1, de->capacity);
-	//unsigned int true_idx = de->real_idx(de, idx); 	
+MyClass& Deque_MyClass_front(Deque_MyClass *de){	
 	unsigned int idx = (de->head < (de->capacity - 1)) ? de->head + 1 : 0;
 	return de->data[idx];						
 }
 					
 MyClass& Deque_MyClass_at(Deque_MyClass *de, int idx) {
-	//unsigned int idx_of_elem = de->real_idx(de, de->head+idx+1);
-	unsigned int idx_of_elem = (de->head + idx) % de->capacity;
+	unsigned int idx_of_elem = (de->head + idx+ 1) % de->capacity;
 	return de->data[idx_of_elem];
 	
 }
 				
 bool Deque_MyClass_pop_back(Deque_MyClass *de){
-	if(!de->empty(de)){
-		//de->tail = de->dec_idx(de, de->tail, 1, de->capacity); 
+	if(!de->empty(de)){ 
+		//printf("pop_back de->tail before %u\n", de->tail);		
 		de->tail = (de->tail > 0) ? de->tail - 1 : de->capacity - 1;		
+		//printf("pop_back de->tail after %u\n", de->tail);
 		de->sz--;								
 			
 		return true;							
@@ -172,8 +146,9 @@ bool Deque_MyClass_pop_back(Deque_MyClass *de){
 					
 bool Deque_MyClass_pop_front(Deque_MyClass *de){
 	if(!de->empty(de)){
-		//de->head = de->inc_idx(de, de->head, 1, de->capacity);
+		//printf("pop_front de->head before %u\n", de->head);		
 		de->head = (de->head < (de->capacity -1)) ? de->head + 1 : 0;
+		//printf("pop_front de->head after %u\n", de->head);	
 		de->sz--;		
 		return true;							
 	}
@@ -192,58 +167,31 @@ void Deque_MyClass_dtor(Deque_MyClass *de){
 }
 
 Deque_MyClass_Iterator Deque_MyClass_begin(Deque_MyClass *de){
+	//printf("in iterator begin\n");	
 	Deque_MyClass_Iterator it;
-	//unsigned int idx = de->inc_idx(de, de->head, 1, de->capacity);
 	unsigned int idx = (de->head < (de->capacity -1)) ? de->head + 1 : 0;
-	size_t at = 0;
+	//printf("de->head %u\n", de->head);	
+	//printf("idx %u\n", idx);	
+	size_t at = (size_t)0;
 	Deque_MyClass_Iterator_ctor(&it, idx, at, de->data, de->capacity);
+	//printf("it.idx %u it.at_element %lu it->capacity %lu\n", it.idx, it.at_element, it.capacity);
 	return it;
 }
 
 Deque_MyClass_Iterator Deque_MyClass_end(Deque_MyClass *de){
+	//printf("in iterator end\n");	
 	Deque_MyClass_Iterator it;
 	unsigned int idx = de->tail; 
-	size_t at = (size_t)de->size;	
+	size_t at = (size_t)de->sz;	
 	Deque_MyClass_Iterator_ctor(&it, idx, at, de->data, de->capacity);
+	//printf("it.idx %u it.at_element %lu it->capacity %lu\n", it.idx, it.at_element, it.capacity);
 	return it;
 }
-
-//unsigned int Deque_MyClass_dec_idx(Deque_MyClass *de, unsigned int idx, 
-//										unsigned int amount, size_t capacity){
-//	unsigned int ret = idx;
-//	for(unsigned int i = 0; i < amount; i++){
-//		ret = ( ret-1 != UINT_MAX ) ? ret - 1 : 2*capacity-1;
-//	}
-//	return ret;
-
-//}
-
-//unsigned int Deque_MyClass_inc_idx(Deque_MyClass *de, unsigned int idx, 
-//										unsigned int amount, size_t capacity){
-//	unsigned int ret = idx;
-//	for(unsigned int i = 0; i < amount; i++){	
-//		ret = ( ret+1 < 4*capacity ) ? ret + 1 : 2*capacity;
-//	}
-//	return ret;
-
-//}
-
-
-
-//unsigned int Deque_MyClass_real_idx(Deque_MyClass *de, unsigned int idx){
-//	return idx%de->capacity;
-//}
-
-//bool Deque_MyClass_has_open_spot(Deque_MyClass *de){
-//	return de->sz < de->capacity;
-//}
 
 
 	
 /* Iterator member fns------------------------------------------------ */
 void Deque_MyClass_Iterator_inc(Deque_MyClass_Iterator *it){
-	//it->idx = ( it->idx+1 < 4*it->capacity ) ? it->idx + 1 : 2*it->capacity;
-	//it->idx = it->idx % it->capacity;
 	it->idx = (it->idx < (it->capacity - 1)) ? it->idx + 1 : 0;	
 	it->at_element++;
 	
@@ -252,8 +200,6 @@ void Deque_MyClass_Iterator_inc(Deque_MyClass_Iterator *it){
 
 	
 void Deque_MyClass_Iterator_dec(Deque_MyClass_Iterator *it){
-	//it->idx = ( it->idx-1 != UINT_MAX ) ? it->idx - 1 : 2*it->capacity-1;
-	//it->idx = it->idx % it->capacity;
 	it->idx = (it->idx > 0) ? it->idx - 1 : it->capacity - 1;
 	it->at_element--;
 	
@@ -270,12 +216,12 @@ bool Deque_MyClass_equal(Deque_MyClass& de1, Deque_MyClass& de2){
 	Deque_MyClass_Iterator it1, it2; //end1, end2;
 	it1 = de1.begin(&de1);
 	it2 = de2.begin(&de2);
-	//end1 = de1.end();
-	//end2 = de2.end();
 	for(unsigned int i = 0; i < de1.sz; i++){
 		bool less = de1.comparator(it1.deref(&it1), it2.deref(&it2));
 		bool greater = de1.comparator(it2.deref(&it2), it1.deref(&it1));	
 		if(less || greater) return false;
+		it1.inc(&it1);
+		it2.inc(&it2);
 	}
 	return true;	
 																
@@ -283,6 +229,9 @@ bool Deque_MyClass_equal(Deque_MyClass& de1, Deque_MyClass& de2){
 
 bool Deque_MyClass_Iterator_equal(Deque_MyClass_Iterator it, 
 													Deque_MyClass_Iterator end){
+	//printf("in iterator equal\n");
+	//printf("it.idx %u end.idx %u it.at_element %lu end.at_element %lu\n",
+			//it.idx, end.idx, it.at_element, end.at_element);
 	return (it.idx == end.idx) && (it.at_element == end.at_element);
 }
 
@@ -301,7 +250,7 @@ void Deque_MyClass_ctor(Deque_MyClass *de,
 							bool (*cmp)(const MyClass &o1, const MyClass &o2)){
 	de->data = (MyClass*)malloc(sizeof(MyClass)*5);	
 	strcpy(de->type_name, MyClass_type_name);				
-	de->head = 0;												
+	de->head = 5-1;												
 	de->tail = 0;										
 	de->sz = 0;	
 	de->capacity = 5;			
@@ -318,11 +267,7 @@ void Deque_MyClass_ctor(Deque_MyClass *de,
 	de->dtor = Deque_MyClass_dtor;
 	de->comparator = cmp;	
 	de->begin = Deque_MyClass_begin;	// currently returns new iterators
-	de->end = Deque_MyClass_end;			// should they return member iterators
-	//de->inc_idx = Deque_MyClass_inc_idx;
-	//de->dec_idx = Deque_MyClass_dec_idx;
-	//de->real_idx = Deque_MyClass_real_idx;
-	//de->has_open_spot = Deque_MyClass_has_open_spot;	
+	de->end = Deque_MyClass_end;			// should they return member iterators	
 	//TODO sort
 }	
 
